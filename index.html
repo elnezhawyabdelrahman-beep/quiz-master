@@ -174,7 +174,7 @@ const Q=[
 ["general","كم عدد ألوان قوس قزح التقليدية؟",["5","6","7","8"],2,"تقليديًا توصف ألوان قوس قزح بسبعة ألوان.","Met Office","easy"],
 ["general","ما اللغة الرسمية الأساسية في البرازيل؟",["الإسبانية","البرتغالية","الفرنسية","الإنجليزية"],1,"البرتغالية هي اللغة الرسمية في البرازيل.","Government of Brazil","easy"],
 ["general","ما اسم العلم الذي يدرس الزلازل؟",["علم الفلك","علم الزلازل","علم المناخ","علم المحيطات"],1,"علم الزلازل يدرس الزلازل والموجات الزلزالية.","USGS","easy"]
-].concat(EXTRA_Q).map((q,i)=>({id:"q"+(i+1),cat:q[0],text:q[1],opts:q[2],correct:q[3],explain:q[4],source:q[5],difficulty:q[6]}));
+].concat(EXTRA_Q,EXTRA_Q2).map((q,i)=>({id:"q"+(i+1),cat:q[0],text:q[1],opts:q[2],correct:q[3],explain:q[4],source:q[5],difficulty:q[6]}));
 const STORE="quizMaster.v1";
 let db=load(),setupCats=new Set(CATS.map(c=>c.id)),setupPlayers=[],game=null,tick=null,seconds=0,answered=false;
 function load(){try{let d=JSON.parse(localStorage.getItem(STORE))||fresh();(d.profiles||[]).forEach(p=>{if(p.coins==null)p.coins=0});return d}catch{return fresh()}}
