@@ -1,7 +1,7 @@
 {
   "name": "Quiz Master - تحدّى معلوماتك",
   "short_name": "Quiz Master",
-  "description": "لعبة أسئلة ثقافية تعمل دون اتصال",
+  "description": "تحديات معلومات وأسئلة متنوعة مع كأس الفوز والاختيارات",
   "lang": "ar",
   "dir": "rtl",
   "start_url": "./",
