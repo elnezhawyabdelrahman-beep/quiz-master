@@ -1,5 +1,5 @@
-const CACHE="quiz-master-v20";
-const ASSETS=["./","./index.html","./manifest.webmanifest","./icon.svg","./question-bank.js","./question-bank-new.js","./question-bank-islamic.js","./question-bank-live.json"];
+const CACHE="quiz-master-v21";
+const ASSETS=["./","./index.html","./manifest.webmanifest","./icon.svg","./question-bank.js?v=20261127-21","./question-bank-new.js?v=20261127-21","./question-bank-islamic.js?v=20261127-21","./question-bank-live.json"];
 self.addEventListener("install",e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting())));
 self.addEventListener("activate",e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
 self.addEventListener("fetch",e=>{
