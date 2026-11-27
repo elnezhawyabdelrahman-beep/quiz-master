@@ -20,10 +20,14 @@ jobs:
         uses: actions/configure-pages@v5
         with:
           enablement: true
+      - name: Prepare public site (exclude local admin)
+        run: |
+          mkdir -p public-site
+          rsync -a --exclude='/.git/' --exclude='/.github/' --exclude='/public-site/' --exclude='/admin-local.html' ./ public-site/
       - name: Upload site artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: public-site
   deploy:
     environment:
       name: github-pages
