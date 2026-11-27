@@ -342,8 +342,29 @@ img,svg,video{max-width:100%}
 <script src="./question-bank-new.js"></script>
 <script src="./question-bank-islamic.js"></script>
 <script>
-// Refresh the public live bank when online; localStorage keeps the last version for offline play.
-(async()=>{try{const r=await fetch("./question-bank-live.json",{cache:"no-store"});if(!r.ok)return;const latest=await r.json();const current=readLiveBank();if((latest.revision||0)>(current.revision||0)){localStorage.setItem(LIVE_BANK_KEY,JSON.stringify(latest));location.reload()}}catch(_){/* offline: keep local snapshot */}})();
+// Automatic bank synchronization: on startup, reconnect, foreground and periodically while open.
+async function refreshLiveBank(){
+ try{
+  const pending=localStorage.getItem("qm_live_bank_reload_pending")==="1";
+  const activeGameScreen=!!document.querySelector("#game.screen.active");
+  if(pending&&!activeGameScreen){localStorage.removeItem("qm_live_bank_reload_pending");location.reload();return}
+  if(!navigator.onLine)return;
+  const response=await fetch("./question-bank-live.json?check="+Date.now(),{cache:"no-store"});
+  if(!response.ok)return;
+  const latest=await response.json(),current=readLiveBank();
+  if(Number(latest.revision||0)>Number(current.revision||0)){
+   localStorage.setItem(LIVE_BANK_KEY,JSON.stringify(latest));
+   if(document.querySelector("#game.screen.active")){
+    localStorage.setItem("qm_live_bank_reload_pending","1");
+    if(typeof toast==="function")toast("وصل تحديث جديد وسيُطبّق بعد انتهاء الجولة حتى لا تفقد تقدمك.");
+   }else{location.reload()}
+  }
+ }catch(_){/* Offline: continue using the last saved bank. */}
+}
+window.addEventListener("online",refreshLiveBank);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)refreshLiveBank()});
+setInterval(refreshLiveBank,45000);
+refreshLiveBank();
 
 const BASE_CATS=[
 {id:"science",name:"العلوم",emoji:"🧪",desc:"الفيزياء والكيمياء والأحياء"},
@@ -532,15 +553,102 @@ function assistantHint(){
  if(answered)return "بعد إجابتك: "+q.explain+"\nالمصدر المسجل: "+q.source;
  return "اقرأ صياغة السؤال وحدد المطلوب أولًا، ثم استبعد الاختيارات التي لا تنطبق. لن أكشف الإجابة الصحيحة قبل اختيارك.";
 }
+let assistantLastCategory=null;
+function assistantNormalize(value){
+ return String(value||"").toLowerCase().replace(/[ًٌٍَُِّْـٰ]/g,"").replace(/[أإآ]/g,"ا").replace(/ى/g,"ي").replace(/ة/g,"ه").replace(/ؤ/g,"و").replace(/ئ/g,"ي").replace(/[؟?!،,.؛:]/g," ").replace(/\s+/g," ").trim();
+}
+function assistantCategoryMatch(text){
+ const t=assistantNormalize(text);
+ const aliases={
+  islamic_all:["الدين","ديني","اسلام","اسلامي","الاقسام الدينيه","المجال الديني"],
+  islamic_quran:["قران","قرآن","مصحف","سور","ايه","ايات","علوم القران"],
+  islamic_hadith:["حديث","احاديث","سنه","السنه النبويه","رواه"],
+  islamic_tafsir:["تفسير","علوم القران","مفسرين"],
+  islamic_seerah:["سيره","السيره","النبي","الرسول","هجره","غزوات"],
+  islamic_fiqh:["فقه","عبادات","صلاه","صلاة","صيام","زكاه","حج","طهاره"],
+  islamic_rulings:["احكام شرعيه","حلال","حرام","واجب","مباح"],
+  islamic_general:["معلومات اسلاميه","عقيده","تاريخ اسلامي"],
+  science:["علوم","علم","فيزياء","كيمياء","احياء","فضاء"],
+  geo:["جغرافيا","دول","عواصم","قارات","بلدان"],
+  history:["تاريخ","حضارات","حروب","حضاره"],
+  sport:["رياضه","كوره","كرة","فوتبول","بطولات"],
+  tech:["تكنولوجيا","تقنيه","كمبيوتر","حاسوب","انترنت","برمجه"],
+  math:["رياضيات","حساب","معادلات","ارقام"],
+  nature:["حيوان","طبيعه","بيئه","نباتات"],
+  general:["معلومات عامه","ثقافه عامه"],
+  culture:["فنون","ثقافه","موسيقي","مسرح"],
+  language:["لغه","لغات","ادب","نحو"],
+  inventions:["اختراعات","ابتكار","مخترعين"],
+  mixed:["متنوع","مختلط","منوع"]
+ };
+ if(aliases.islamic_all.some(a=>t.includes(assistantNormalize(a))))return {all:true};
+ const hits=[];
+ CATS.forEach(cat=>{
+  const words=[cat.name,cat.id,cat.desc].concat(aliases[cat.id]||[]).map(assistantNormalize).filter(x=>x.length>1);
+  const score=words.reduce((n,w)=>n+(t.includes(w)?(w.length>4?3:1):0),0);
+  if(score)hits.push({cat,score});
+ });
+ hits.sort((a,b)=>b.score-a.score);
+ return hits.length?{cat:hits[0].cat,ambiguous:hits.length>1&&hits[0].score===hits[1].score}:null;
+}
+function assistantCategoryAnswer(match){
+ if(match.all){
+  const list=CATS.filter(c=>c.id.startsWith("islamic_"));
+  return "المجال الديني في اللعبة يضم "+list.length+" أقسام: "+list.map(c=>c.name+" ("+Q.filter(q=>q.cat===c.id).length+" سؤال)").join("، ")+". تقدر تختار «الدين الإسلامي» لاختيارها كلها، أو تحدد قسمًا واحدًا من شاشة إعداد التحدي.";
+ }
+ const cat=match.cat,count=Q.filter(q=>q.cat===cat.id).length;
+ assistantLastCategory=cat.id;
+ return "تقصد غالبًا قسم «"+cat.name+"». "+(cat.desc||"")+"\nالمتاح حاليًا في البنك: "+count+" سؤال. تقدر تضغط بطاقة القسم في الصفحة الرئيسية لبدء تحدٍ منه.";
+}
+function assistantGameGuide(){
+ const total=Q.length,active=CATS.length;
+ return "Quiz Master لعبة مسابقات معلومات عامة تقدر تلعبها بمفردك، أو ضد الكمبيوتر، أو مع أكثر من لاعب على نفس الجهاز. تختار قسمًا أو عدة أقسام، وعدد الأسئلة ومستوى الصعوبة والمؤقت، ثم تجاوب وتجمع النقاط والخبرة والعملات. عند الإجابة تظهر النتيجة والشرح والمصدر إذا كانا متوفرين. عندك ملفات لاعبين وسجل جولات ومستويات وإحصائيات ومساعدات أثناء اللعب.\nالمحتوى الحالي: "+active+" قسمًا و"+total+" سؤالًا محمّلًا على هذا الجهاز. اللعبة تحفظ تقدمك محليًا وتستخدم آخر بنك أسئلة تم تنزيله عند عدم وجود إنترنت.";
+}
 function assistantReply(raw){
- const t=raw.trim().toLowerCase();if(!t)return;
- assistantSay(raw,true);
- let answerText;
- if(/إحص|مستوى|نقاط|تقدّم|تقدم|أدائي/.test(t))answerText=assistantStats();
- else if(/اقترح|تحد|مجال|أتمرن|أراجع/.test(t))answerText=assistantRecommend();
- else if(/السؤال|تلميح|مساعدة|أحل/.test(t))answerText=assistantHint();
- else if(/مصدر|توثيق|معلومة/.test(t))answerText=answered&&game?"مصدر السؤال الحالي: "+game.questions[game.index].source:"ستظهر بيانات المصدر بعد الإجابة، حتى لا تكشف الحل قبل أوانه.";
- else answerText="أقدر حاليًا أراجع إحصائياتك، وأقترح مجالًا للتدريب، وأقدم إرشادًا لا يكشف الحل قبل الإجابة. جرّب أزرار المساعدة السريعة.";
+ const original=raw.trim();if(!original)return;
+ assistantSay(original,true);
+ const t=assistantNormalize(original);
+ let answerText="";
+ const match=assistantCategoryMatch(t);
+ if(/من انت|مين انت|المساعد|تقدر تعمل|تساعدني في ايه|مساعد ذكي/.test(t)){
+  answerText="أنا المساعد الذكي داخل Quiz Master. أقدر أشرح طريقة اللعب والأقسام والنقاط والمستويات والإعدادات، وأراجع إحصائياتك، وأقترح مجالًا للتدريب، وأساعدك في فهم السؤال دون كشف الإجابة قبل ما تجاوب. اكتب سؤالك بطريقتك العادية، حتى لو بالعامية.";
+ }else if(/اللعبه دي|ما هي اللعبه|ايه هي اللعبه|عن ايه اللعبه|اشرح اللعبه|عرفني اللعبه|quiz master/.test(t)){
+  answerText=assistantGameGuide();
+ }else if(match){
+  if(match.ambiguous)answerText="ممكن تقصد أكثر من قسم. اكتب اسم القسم بشكل أدق، أو قل لي هل تقصد «"+match.cat.name+"»؟";
+  else answerText=assistantCategoryAnswer(match);
+ }else if(/احص|مستوي|نقاط|تقدم|ادائي|نتيجتي|جولاتي|عملاتي|خبرتي/.test(t)){
+  answerText=assistantStats();
+ }else if(/اقترح|تحد|اتدرب|اتمرن|اراجع|ضعيف|اخطائي/.test(t)){
+  answerText=assistantRecommend();
+ }else if(/ازاي العب|كيف العب|ابدا اللعب|ابدأ اللعب|طريقة اللعب|ابدأ ازاي/.test(t)){
+  answerText="لبدء اللعب: اضغط «ابدأ تحدي سريع» أو اختر بطاقة قسم من الصفحة الرئيسية. بعد ذلك حدد الأقسام، وعدد الأسئلة، والصعوبة، والمؤقت، وطريقة اللعب، ثم اضغط «ابدأ اللعب».";
+ }else if(/كم نقط|النقاط|احتساب النقاط|اكسب نقاط|اجمع نقاط/.test(t)){
+  answerText="تحصل على نقاط عند الإجابة الصحيحة، وتختلف الخبرة حسب الصعوبة: السهل 10 XP، والمتوسط 15 XP، والصعب 20 XP، مع مكافأة سلسلة إجابات صحيحة. وقد تحصل على نقاط إضافية بحسب الوقت المتبقي. المستوى يرتفع تدريجيًا مع جمع الخبرة.";
+ }else if(/مستويات|المستوي|ارفع مستوا|المستوى/.test(t)){
+  answerText="المستويات تعتمد على نقاط الخبرة XP التي تجمعها من الإجابات الصحيحة. كلما ارتفعت، زادت الخبرة المطلوبة للمستوى التالي. تقدر تشوف مستواك وشريط التقدم في الصفحة الرئيسية.";
+ }else if(/صاحبي|اصحابي|اصدقائي|لاعبين|منافس|الكمبيوتر/.test(t)){
+  answerText="تقدر تلعب ضد الكمبيوتر، أو تعمل منافسة محلية بين لاعبين أو أكثر على نفس الجهاز. في المنافسة المحلية أضف ملفات اللاعبين من شاشة الإعداد، ومرروا الجهاز بينكم بعد كل سؤال. المنافسة عبر الإنترنت ليست مفعلة في النسخة الحالية.";
+ }else if(/انترنت|نت|اوفلاين|بدون نت|من غير نت|اتصال/.test(t)){
+  answerText="اللعبة مصممة لتعمل دون إنترنت بعد تحميلها أول مرة، وتستخدم آخر نسخة محفوظة من الأسئلة. عند عودة الاتصال، تتحقق تلقائيًا من التحديثات وهي مفتوحة أو عند فتحها، ثم تحفظ البنك الجديد على الجهاز.";
+ }else if(/تحديث|الاسئله الجديده|الاقسام الجديده|اضافه قسم/.test(t)){
+  answerText="تحديثات الأسئلة والأقسام تُنشر من لوحة الإدارة. عندما يتصل جهازك بالإنترنت واللعبة مفتوحة أو تُفتح من جديد، تتحقق من البنك الجديد وتحمله تلقائيًا. لا تحتاج إلى إعادة تثبيت اللعبة.";
+ }else if(/السؤال|تلميح|مساعدة|احل|افهم السؤال/.test(t)){
+  answerText=assistantHint();
+ }else if(/مصدر|توثيق/.test(t)){
+  answerText=answered&&game?"مصدر السؤال الحالي: "+(game.questions[game.index].source||"لا يوجد مصدر مسجل لهذا السؤال."):"المصدر يظهر بعد الإجابة إذا كان مسجلًا، حتى لا أكشف معلومات الحل قبل اختيارك.";
+ }else if(/اعدادات|الصوت|المؤثرات|الشرح/.test(t)){
+  answerText="من زر الإعدادات في أعلى الصفحة تقدر تتحكم في المؤثرات الصوتية وعرض شرح الإجابة بعد كل سؤال، وتقدر تصدّر نسخة احتياطية من بيانات اللاعبين.";
+ }else if(/ملف لاعب|اللاعبين|اضيف لاعب|انشاء لاعب/.test(t)){
+  answerText="من زر اللاعبين في أعلى الصفحة تقدر تنشئ ملف لاعب جديد وتبدّل بين الملفات. لكل ملف تقدمه وإحصائياته وسجل مشاركاته على نفس الجهاز.";
+ }else if(/شكرا|متشكر|تمام/.test(t)){
+  answerText="العفو! لو عندك سؤال عن أي قسم أو ميزة في Quiz Master اكتبه بطريقتك، وهحاول أوضحها لك.";
+ }else if(assistantLastCategory&&/ده|دي|القسم ده|القسم دي|فيه كام|كام سؤال/.test(t)){
+  const cat=CATS.find(x=>x.id===assistantLastCategory);
+  answerText=cat?"لسه بنتكلم عن قسم «"+cat.name+"». عدد الأسئلة المتاحة فيه حاليًا "+Q.filter(q=>q.cat===cat.id).length+" سؤال.":"ممكن توضح اسم القسم اللي تقصده؟";
+ }else{
+  answerText="فهمت إن عندك سؤال عن اللعبة، لكن محتاج توضيح بسيط عشان ما أديكش معلومة غير دقيقة. هل سؤالك عن طريقة اللعب، قسم معين، الأسئلة، النقاط والمستويات، ملفات اللاعبين، أو الإعدادات؟ اكتب الكلمة أو العبارة اللي تقصدها، وسأربطها بالأقسام والميزات الموجودة فعلًا.";
+ }
  assistantSay(answerText);
 }
 document.getElementById("assistantToggle").addEventListener("click",()=>{
