@@ -1,29 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
 <defs>
- <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#172d50"/><stop offset="1" stop-color="#060d1c"/></linearGradient>
- <linearGradient id="gold" x1="0" y1="0" x2="0.9" y2="1"><stop stop-color="#fff0b4"/><stop offset=".48" stop-color="#f5c75d"/><stop offset="1" stop-color="#b97822"/></linearGradient>
- <linearGradient id="blue" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#74d9ed"/><stop offset="1" stop-color="#3473b8"/></linearGradient>
- <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="8"/></filter>
+ <linearGradient id="bg" x2="1" y2="1"><stop stop-color="#243f68"/><stop offset="1" stop-color="#071020"/></linearGradient>
+ <linearGradient id="card" x2="0" y2="1"><stop stop-color="#fff4cf"/><stop offset="1" stop-color="#e6c77e"/></linearGradient>
+ <linearGradient id="gold" x2="1" y2="1"><stop stop-color="#fff0ad"/><stop offset="1" stop-color="#d18e2d"/></linearGradient>
+ <filter id="shadow"><feGaussianBlur stdDeviation="10"/></filter>
 </defs>
 <rect width="512" height="512" rx="112" fill="url(#bg)"/>
-<rect x="18" y="18" width="476" height="476" rx="98" fill="none" stroke="#f5ce76" stroke-opacity=".45" stroke-width="5"/>
-<circle cx="256" cy="225" r="166" fill="#f4c85e" opacity=".09" filter="url(#shadow)"/>
-<!-- trophy cup: knowledge challenge and achievement -->
-<path d="M160 104h192v89c0 79-39 129-96 129s-96-50-96-129z" fill="url(#gold)" stroke="#fff0b4" stroke-width="8" stroke-linejoin="round"/>
-<path d="M160 137H91v38c0 59 33 91 86 93l15-42c-28-9-43-29-43-62v-27zm192 0h69v38c0 59-33 91-86 93l-15-42c28-9 43-29 43-62v-27z" fill="none" stroke="url(#gold)" stroke-width="20" stroke-linejoin="round"/>
-<path d="M256 157c-35 0-57 24-57 55 0 23 13 40 31 49l-5 28h62l-5-28c18-9 31-26 31-49 0-31-22-55-57-55z" fill="#142746"/>
-<path d="M256 175v47m0 28v3" stroke="#ffe7a0" stroke-width="16" stroke-linecap="round"/>
-<path d="M224 320h64v43h-64z" fill="url(#gold)"/>
-<path d="M185 365h142v35H185z" rx="10" fill="url(#gold)"/>
-<!-- four answer tiles -->
-<g stroke="#d8e8ff" stroke-width="6">
- <rect x="84" y="407" width="74" height="62" rx="17" fill="url(#blue)"/>
- <rect x="171" y="407" width="74" height="62" rx="17" fill="#244d7e"/>
- <rect x="267" y="407" width="74" height="62" rx="17" fill="#244d7e"/>
- <rect x="354" y="407" width="74" height="62" rx="17" fill="url(#blue)"/>
-</g>
-<g fill="#fff" font-family="Arial,sans-serif" font-size="35" font-weight="700" text-anchor="middle">
- <text x="121" y="449">A</text><text x="208" y="449">B</text><text x="304" y="449">C</text><text x="391" y="449">D</text>
-</g>
-<path d="M256 62l11 21 24 3-17 17 4 24-22-12-22 12 4-24-17-17 24-3z" fill="#fff0b4"/>
+<rect x="18" y="18" width="476" height="476" rx="98" fill="none" stroke="#f4d48a" stroke-opacity=".45" stroke-width="5"/>
+<circle cx="256" cy="250" r="190" fill="#e8b94d" opacity=".12" filter="url(#shadow)"/>
+<rect x="94" y="76" width="324" height="360" rx="34" fill="url(#card)" stroke="#fff3cc" stroke-width="8"/>
+<path d="M145 145h222" stroke="#344b6c" stroke-width="15" stroke-linecap="round"/>
+<circle cx="153" cy="218" r="22" fill="#d49a36"/><path d="M144 218l7 8 15-18" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M196 218h164" stroke="#52647a" stroke-width="13" stroke-linecap="round"/>
+<circle cx="153" cy="286" r="22" fill="#315b91"/><path d="M196 286h142" stroke="#52647a" stroke-width="13" stroke-linecap="round"/>
+<circle cx="153" cy="354" r="22" fill="#315b91"/><path d="M196 354h164" stroke="#52647a" stroke-width="13" stroke-linecap="round"/>
+<circle cx="370" cy="365" r="67" fill="#0e6d55" stroke="#a4f0c9" stroke-width="9"/>
+<path d="M337 365l23 24 45-52" fill="none" stroke="#fff" stroke-width="17" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M256 35l12 24 27 4-20 19 5 27-24-13-24 13 5-27-20-19 27-4z" fill="url(#gold)"/>
 </svg>
