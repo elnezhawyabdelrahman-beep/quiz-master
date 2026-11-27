@@ -63,14 +63,37 @@ jobs:
           }
           assert(admin.includes('<textarea id="source"'), 'Admin source field must support multiple lines');
           assert(admin.includes('const BASE_Q='), 'Admin must load the same base question data');
+          assert(admin.includes('id="adminInstallBtn"'), 'Admin install button must exist');
           const counts = Object.fromEntries([...categoryIds].map(id => [id, questions.filter(q => q.cat === id).length]));
           console.log('Validated ' + questions.length + ' questions across ' + categoryIds.size + ' categories.');
           console.log(JSON.stringify(counts));
           NODE
-      - name: Prepare public site (exclude local admin)
+      - name: Prepare public site and installable admin dashboard
         run: |
-          mkdir -p public-site
+          mkdir -p public-site public-site/admin
           rsync -a --exclude='/.git/' --exclude='/.github/' --exclude='/public-site/' --exclude='/admin-local.html' ./ public-site/
+          cp admin-local.html public-site/admin/index.html
+          cat > public-site/admin/manifest.webmanifest <<'EOF'
+          {
+            "name": "Quiz Master — لوحة التحكم",
+            "short_name": "لوحة Quiz Master",
+            "description": "إدارة بنك أسئلة Quiz Master",
+            "lang": "ar",
+            "dir": "rtl",
+            "start_url": "./",
+            "scope": "./",
+            "display": "standalone",
+            "background_color": "#08111f",
+            "theme_color": "#101827",
+            "icons": [{"src":"../icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+          }
+          EOF
+          cat > public-site/admin/sw.js <<'EOF'
+          const CACHE="quiz-master-admin-v1";
+          self.addEventListener("install",e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(["./","./index.html","./manifest.webmanifest","../icon.svg"])).then(()=>self.skipWaiting())));
+          self.addEventListener("activate",e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
+          self.addEventListener("fetch",e=>{if(e.request.method!=="GET")return;const u=new URL(e.request.url);if(u.origin!==location.origin)return;e.respondWith(fetch(e.request).then(r=>{if(r.ok){const copy=r.clone();caches.open(CACHE).then(c=>c.put(e.request,copy));}return r}).catch(()=>caches.match(e.request))) });
+          EOF
       - name: Upload site artifact
         uses: actions/upload-pages-artifact@v3
         with:
