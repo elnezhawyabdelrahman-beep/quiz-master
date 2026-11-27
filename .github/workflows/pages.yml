@@ -33,7 +33,7 @@ jobs:
             assert(match, 'Missing ' + label);
             return Function('"use strict"; return (' + match[1] + ')')();
           }
-          const base = arrayFrom(index, /const BASE_Q=(\[[\s\S]*?\])\.concat\(EXTRA_Q,EXTRA_Q2,EXTRA_Q3\)/, 'base questions');
+          const base = arrayFrom(index, /const BASE_Q=(\[[\s\S]*?\])\.concat\(/, 'base questions');
           const categories = arrayFrom(index, /const BASE_CATS=(\[[\s\S]*?\]);/, 'base categories');
           const extras = [
             ['question-bank.js', /const EXTRA_Q\s*=\s*(\[[\s\S]*?\]);/],
