@@ -338,9 +338,9 @@ img,svg,video{max-width:100%}
   <small class="assistant-note">مساعد محلي يعمل دون إنترنت؛ لا يدّعي أنه نموذج محادثة متصل.</small>
 </div>
 <button id="assistantToggle" class="assistant-toggle" aria-expanded="false">✨ <span>المساعد الذكي</span></button>
-<script src="./question-bank.js?v=20261127-21"></script>
-<script src="./question-bank-new.js?v=20261127-21"></script>
-<script src="./question-bank-islamic.js?v=20261127-21"></script>
+<script src="./question-bank.js?v=20261127-22"></script>
+<script src="./question-bank-new.js?v=20261127-22"></script>
+<script src="./question-bank-islamic.js?v=20261127-22"></script>
 <script>
 // Automatic bank synchronization: on startup, reconnect, foreground and periodically while open.
 async function refreshLiveBank(){
@@ -445,7 +445,7 @@ const BASE_Q=[
 ["general","كم عدد ألوان قوس قزح التقليدية؟",["5","6","7","8"],2,"تقليديًا توصف ألوان قوس قزح بسبعة ألوان.","Met Office","easy"],
 ["general","ما اللغة الرسمية الأساسية في البرازيل؟",["الإسبانية","البرتغالية","الفرنسية","الإنجليزية"],1,"البرتغالية هي اللغة الرسمية في البرازيل.","Government of Brazil","easy"],
 ["general","ما اسم العلم الذي يدرس الزلازل؟",["علم الفلك","علم الزلازل","علم المناخ","علم المحيطات"],1,"علم الزلازل يدرس الزلازل والموجات الزلزالية.","USGS","easy"]
-].concat(EXTRA_Q,EXTRA_Q2,EXTRA_Q3).map((q,i)=>({id:"q"+(i+1),cat:q[0],text:q[1],opts:q[2],correct:q[3],explain:q[4],source:q[5],difficulty:q[6],details:q[7]||null}));
+].concat(window.QM_EXTRA_Q||[],window.QM_EXTRA_Q2||[],window.QM_EXTRA_Q3||[]).map((q,i)=>({id:"q"+(i+1),cat:q[0],text:q[1],opts:q[2],correct:q[3],explain:q[4],source:q[5],difficulty:q[6],details:q[7]||null}));
 const Q=BASE_Q.filter(q=>!(LIVE_BANK.deletedQuestionIds||[]).includes(q.id))
  .map(q=>({...q,...((LIVE_BANK.questionOverrides||{})[q.id]||{})}))
  .concat(LIVE_BANK.questions||[]);
@@ -528,7 +528,7 @@ document.getElementById("installBtn").onclick=async()=>{soundEvent("click");if(d
 syncInstallUI();
 window.matchMedia("(display-mode: standalone)").addEventListener?.("change",syncInstallUI);
 
-if("serviceWorker"in navigator){window.addEventListener("load",async()=>{try{const registration=await navigator.serviceWorker.register("./sw.js?v=21");registration.update().catch(()=>{});window.addEventListener("online",()=>registration.update().catch(()=>{}))}catch(_){}})}
+if("serviceWorker"in navigator){window.addEventListener("load",async()=>{try{const registration=await navigator.serviceWorker.register("./sw.js?v=22");registration.update().catch(()=>{});window.addEventListener("online",()=>registration.update().catch(()=>{}))}catch(_){}})}
 
 /* Safe, offline-first assistant. It never reveals a current answer before submission. */
 function assistantSay(message,fromUser=false){
