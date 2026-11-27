@@ -1,10 +1,25 @@
 {
   "schema": 1,
-  "revision": 1795816372861,
+  "revision": 1795816524863,
   "categories": [],
   "deletedCategoryIds": [],
   "categoryOverrides": {},
   "questions": [
+    {
+      "id": "custom_mwzisinb_qr56e",
+      "cat": "culture",
+      "text": "اختبار تجريبي",
+      "opts": [
+        "1",
+        "2",
+        "3",
+        "4"
+      ],
+      "correct": 0,
+      "difficulty": "medium",
+      "source": "",
+      "explain": ""
+    },
     {
       "id": "custom_mwzinla1_vqhe4",
       "cat": "language",
