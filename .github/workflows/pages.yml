@@ -20,6 +20,53 @@ jobs:
         uses: actions/configure-pages@v5
         with:
           enablement: true
+      - name: Validate question bank and dashboard parity
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const assert = require('assert');
+          const index = fs.readFileSync('index.html', 'utf8');
+          const admin = fs.readFileSync('admin-local.html', 'utf8');
+          const live = JSON.parse(fs.readFileSync('question-bank-live.json', 'utf8'));
+          function arrayFrom(source, pattern, label) {
+            const match = source.match(pattern);
+            assert(match, 'Missing ' + label);
+            return Function('"use strict"; return (' + match[1] + ')')();
+          }
+          const base = arrayFrom(index, /const BASE_Q=(\[[\s\S]*?\])\.concat\(EXTRA_Q,EXTRA_Q2,EXTRA_Q3\)/, 'base questions');
+          const categories = arrayFrom(index, /const BASE_CATS=(\[[\s\S]*?\]);/, 'base categories');
+          const extras = [
+            ['question-bank.js', /const EXTRA_Q\s*=\s*(\[[\s\S]*?\]);/],
+            ['question-bank-new.js', /const EXTRA_Q2\s*=\s*(\[[\s\S]*?\]);/],
+            ['question-bank-islamic.js', /const EXTRA_Q3\s*=\s*(\[[\s\S]*?\]);/]
+          ].map(([file, pattern]) => arrayFrom(fs.readFileSync(file, 'utf8'), pattern, file));
+          const baseQuestions = base.concat(...extras).map((q, i) => ({
+            id: 'q' + (i + 1), cat: q[0], text: q[1], opts: q[2], correct: q[3],
+            explain: q[4] || '', source: q[5] || '', difficulty: q[6] || 'easy'
+          }));
+          const questions = baseQuestions
+            .filter(q => !(live.deletedQuestionIds || []).includes(q.id))
+            .map(q => Object.assign({}, q, (live.questionOverrides || {})[q.id] || {}))
+            .concat(live.questions || []);
+          const categoryIds = new Set(
+            categories.filter(c => !(live.deletedCategoryIds || []).includes(c.id)).map(c => c.id)
+              .concat((live.categories || []).map(c => c.id))
+          );
+          const ids = new Set();
+          for (const q of questions) {
+            assert(q.id && !ids.has(q.id), 'Duplicate or missing question id: ' + q.id);
+            ids.add(q.id);
+            assert(categoryIds.has(q.cat), 'Question references missing category: ' + q.id + ' -> ' + q.cat);
+            assert(typeof q.text === 'string' && q.text.trim(), 'Empty question: ' + q.id);
+            assert(Array.isArray(q.opts) && q.opts.length === 4 && q.opts.every(x => String(x || '').trim()), 'Invalid options: ' + q.id);
+            assert(Number.isInteger(q.correct) && q.correct >= 0 && q.correct < 4, 'Invalid correct answer: ' + q.id);
+          }
+          assert(admin.includes('<textarea id="source"'), 'Admin source field must support multiple lines');
+          assert(admin.includes('const BASE_Q='), 'Admin must load the same base question data');
+          const counts = Object.fromEntries([...categoryIds].map(id => [id, questions.filter(q => q.cat === id).length]));
+          console.log('Validated ' + questions.length + ' questions across ' + categoryIds.size + ' categories.');
+          console.log(JSON.stringify(counts));
+          NODE
       - name: Prepare public site (exclude local admin)
         run: |
           mkdir -p public-site
