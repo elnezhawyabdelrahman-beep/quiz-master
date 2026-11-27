@@ -1,7 +1,7 @@
 {
   "name": "Quiz Master - تحدّى معلوماتك",
   "short_name": "Quiz Master",
-  "description": "تحديات معلومات وأسئلة متنوعة مع كأس الفوز والاختيارات",
+  "description": "تحديات معلومات وأسئلة اختيار من متعدد ومساعد محلي",
   "lang": "ar",
   "dir": "rtl",
   "start_url": "./",
