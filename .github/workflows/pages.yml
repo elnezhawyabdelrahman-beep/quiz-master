@@ -67,6 +67,16 @@ jobs:
           const counts = Object.fromEntries([...categoryIds].map(id => [id, questions.filter(q => q.cat === id).length]));
           console.log('Validated ' + questions.length + ' questions across ' + categoryIds.size + ' categories.');
           console.log(JSON.stringify(counts));
+          function validateInlineScripts(html, label) {
+            const scripts = [...html.matchAll(/<script(?:\\s[^>]*)?>([\\s\\S]*?)<\\/script>/g)].map(m => m[1]).filter(s => s.trim());
+            for (const [i, source] of scripts.entries()) {
+              try { new Function(source); }
+              catch (error) { throw new Error(label + ' inline script ' + (i + 1) + ': ' + error.message); }
+            }
+          }
+          validateInlineScripts(index, 'Game');
+          validateInlineScripts(admin, 'Dashboard');
+          console.log('Inline JavaScript syntax validated.');
           NODE
       - name: Prepare public site and installable admin dashboard
         run: |
