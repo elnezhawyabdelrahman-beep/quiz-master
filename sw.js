@@ -9,7 +9,7 @@ self.addEventListener("fetch",e=>{
   e.respondWith(fetch(e.request,{cache:"no-store"}).then(res=>{if(res.ok){const copy=res.clone();caches.open(CACHE).then(cache=>cache.put("./index.html",copy));}return res;}).catch(()=>caches.match("./index.html")));
   return;
  }
- if(/\\/question-bank(?:-new|-islamic)?\\.js$/.test(url.pathname)){
+ if(url.pathname.includes("/question-bank")&&url.pathname.endsWith(".js")){
   e.respondWith(fetch(e.request,{cache:"no-store"}).then(res=>{if(res.ok){const copy=res.clone();caches.open(CACHE).then(cache=>cache.put(e.request,copy));}return res;}).catch(()=>caches.match(e.request)));
   return;
  }
