@@ -342,7 +342,10 @@ img,svg,video{max-width:100%}
 <script src="./question-bank-new.js"></script>
 <script src="./question-bank-islamic.js"></script>
 <script>
-const CATS=[
+// Refresh the public live bank when online; localStorage keeps the last version for offline play.
+(async()=>{try{const r=await fetch("./question-bank-live.json?check="+Date.now(),{cache:"no-store"});if(!r.ok)return;const latest=await r.json();const current=readLiveBank();if((latest.revision||0)>(current.revision||0)){localStorage.setItem(LIVE_BANK_KEY,JSON.stringify(latest));location.reload()}}catch(_){/* offline: keep local snapshot */}})();
+
+const BASE_CATS=[
 {id:"science",name:"العلوم",emoji:"🧪",desc:"الفيزياء والكيمياء والأحياء"},
 {id:"geo",name:"الجغرافيا",emoji:"🌍",desc:"دول وعواصم ومعالم"},
 {id:"history",name:"التاريخ",emoji:"🏛️",desc:"حضارات وأحداث تاريخية"},
@@ -363,10 +366,16 @@ const CATS=[
 {id:"islamic_rulings",name:"الأحكام الشرعية",emoji:"⚖️",desc:"الواجب والمندوب والمباح والخلاف الفقهي"},
 {id:"islamic_general",name:"المعلومات الإسلامية",emoji:"☪️",desc:"العقيدة والتاريخ والمعلومات الإسلامية"}
 ];
+const LIVE_BANK_KEY="quizMaster.liveBank.v1";
+function readLiveBank(){try{return JSON.parse(localStorage.getItem(LIVE_BANK_KEY)||"{}")}catch{return{}}}
+let LIVE_BANK=readLiveBank();
+const CATS=BASE_CATS.filter(c=>!(LIVE_BANK.deletedCategoryIds||[]).includes(c.id))
+ .map(c=>({...c,...((LIVE_BANK.categoryOverrides||{})[c.id]||{})}))
+ .concat(LIVE_BANK.categories||[]);
 const ISLAMIC_IDS=CATS.filter(c=>c.id.startsWith("islamic_")).map(c=>c.id);
 const HOME_CATS=CATS.filter(c=>!c.id.startsWith("islamic_")).concat([{id:"islamic_all",name:"الدين الإسلامي",emoji:"☪️",desc:"كل الأقسام الدينية أو اختر تخصصًا واحدًا"}]);
 
-const Q=[
+const BASE_Q=[
 ["science","ما الغاز الذي تمتصه النباتات غالبًا أثناء البناء الضوئي؟",["الأكسجين","ثاني أكسيد الكربون","النيتروجين","الهيدروجين"],1,"تستخدم النباتات ثاني أكسيد الكربون والماء والطاقة الضوئية لصنع السكريات.","NASA Climate Kids","easy"],
 ["science","ما وحدة قياس شدة التيار الكهربائي؟",["الفولت","الأوم","الأمبير","الواط"],2,"الأمبير هو وحدة قياس شدة التيار الكهربائي في النظام الدولي.","BIPM SI Brochure","easy"],
 ["science","أي جزء من الخلية يحتوي عادةً على معظم المادة الوراثية؟",["النواة","الغشاء","السيتوبلازم","الجدار الخلوي"],0,"توجد معظم المادة الوراثية في نواة الخلايا حقيقية النواة.","OpenStax Biology","easy"],
@@ -416,6 +425,9 @@ const Q=[
 ["general","ما اللغة الرسمية الأساسية في البرازيل؟",["الإسبانية","البرتغالية","الفرنسية","الإنجليزية"],1,"البرتغالية هي اللغة الرسمية في البرازيل.","Government of Brazil","easy"],
 ["general","ما اسم العلم الذي يدرس الزلازل؟",["علم الفلك","علم الزلازل","علم المناخ","علم المحيطات"],1,"علم الزلازل يدرس الزلازل والموجات الزلزالية.","USGS","easy"]
 ].concat(EXTRA_Q,EXTRA_Q2,EXTRA_Q3).map((q,i)=>({id:"q"+(i+1),cat:q[0],text:q[1],opts:q[2],correct:q[3],explain:q[4],source:q[5],difficulty:q[6],details:q[7]||null}));
+const Q=BASE_Q.filter(q=>!(LIVE_BANK.deletedQuestionIds||[]).includes(q.id))
+ .map(q=>({...q,...((LIVE_BANK.questionOverrides||{})[q.id]||{})}))
+ .concat(LIVE_BANK.questions||[]);
 const STORE="quizMaster.v1";
 let db=load(),setupCats=new Set(CATS.map(c=>c.id)),setupPlayers=[],game=null,tick=null,seconds=0,answered=false;
 function load(){try{let d=JSON.parse(localStorage.getItem(STORE))||fresh();(d.profiles||[]).forEach(p=>{if(p.coins==null)p.coins=0});return d}catch{return fresh()}}
