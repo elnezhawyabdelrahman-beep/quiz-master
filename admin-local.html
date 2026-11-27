@@ -32,7 +32,7 @@ async function api(path,options={}){const r=await fetch(API+path,{...options,hea
 function repo(){return $("repo").value.trim()}function rawPath(){return "/repos/"+repo()+"/contents/question-bank-live.json"}
 function decodeContent(d){return decodeURIComponent(escape(atob((d.content||"").replace(/\n/g,""))))}
 async function readText(path){return decodeContent(await api("/repos/"+repo()+"/contents/"+path))}
-function parseLiteralArray(source,pattern){const m=source.match(pattern);if(!m)throw Error("تعذر قراءة بنك الأسئلة");return JSON.parse(m[1])}
+function parseLiteralArray(source,pattern){const m=source.match(pattern);if(!m)throw Error("تعذر قراءة بنك الأسئلة");try{return Function("\"use strict\"; return ("+m[1]+")")()}catch(e){throw Error("تعذر تحليل بيانات اللعبة: "+e.message)}}
 let baseQuestions=[],baseCategories=[];
 async function loadBaseBank(){
  const main=await readText("index.html");
