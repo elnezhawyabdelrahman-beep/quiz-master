@@ -1,26 +1,10 @@
 {
   "schema": 1,
-  "revision": 1795813691261,
+  "revision": 1795814202214,
   "categories": [],
   "deletedCategoryIds": [],
   "categoryOverrides": {},
-  "questions": [
-    {
-      "id": "custom_mwzh3ror_56i3w",
-      "cat": "culture",
-      "text": "سؤال تجريبي للاختبار",
-      "opts": [
-        "A",
-        "B",
-        "C",
-        "D"
-      ],
-      "correct": 0,
-      "difficulty": "easy",
-      "source": "",
-      "explain": ""
-    }
-  ],
+  "questions": [],
   "questionOverrides": {},
   "deletedQuestionIds": [],
   "settings": {}
