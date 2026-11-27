@@ -36,12 +36,12 @@ function parseLiteralArray(source,pattern){const m=source.match(pattern);if(!m)t
 let baseQuestions=[],baseCategories=[];
 async function loadBaseBank(){
  const main=await readText("index.html");
- const core=parseLiteralArray(main,/const Q=(\[[\s\S]*?\])\.concat\(EXTRA_Q,EXTRA_Q2,EXTRA_Q3\)/);
+ const core=parseLiteralArray(main,/const BASE_Q=(\[[\s\S]*?\])\.concat\(EXTRA_Q,EXTRA_Q2,EXTRA_Q3\)/);
  const files=await Promise.all(["question-bank.js","question-bank-new.js","question-bank-islamic.js"].map(readText));
  const extras=files.map((source,i)=>{const suffix=i===0?"":String(i+1);return parseLiteralArray(source,new RegExp("const EXTRA_Q"+suffix+"\\s*=\\s*(\\[[\\s\\S]*?\\]);"))});
  const all=core.concat(...extras);
  baseQuestions=all.map((q,i)=>({id:"q"+(i+1),cat:q[0],text:q[1],opts:q[2],correct:q[3],explain:q[4],source:q[5],difficulty:q[6],details:q[7]||null}));
- baseCategories=parseLiteralArray(main,/const CATS=(\[[\s\S]*?\]);/);
+ baseCategories=parseLiteralArray(main,/const BASE_CATS=(\[[\s\S]*?\]);/);
 }
 async function loadBank(){const d=await api(rawPath());bank=JSON.parse(decodeContent(d));await loadBaseBank();$("connection").textContent="متصل";render()}
 function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
