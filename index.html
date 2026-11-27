@@ -343,7 +343,7 @@ img,svg,video{max-width:100%}
 <script src="./question-bank-islamic.js"></script>
 <script>
 // Refresh the public live bank when online; localStorage keeps the last version for offline play.
-(async()=>{try{const r=await fetch("./question-bank-live.json?check="+Date.now(),{cache:"no-store"});if(!r.ok)return;const latest=await r.json();const current=readLiveBank();if((latest.revision||0)>(current.revision||0)){localStorage.setItem(LIVE_BANK_KEY,JSON.stringify(latest));location.reload()}}catch(_){/* offline: keep local snapshot */}})();
+(async()=>{try{const r=await fetch("./question-bank-live.json",{cache:"no-store"});if(!r.ok)return;const latest=await r.json();const current=readLiveBank();if((latest.revision||0)>(current.revision||0)){localStorage.setItem(LIVE_BANK_KEY,JSON.stringify(latest));location.reload()}}catch(_){/* offline: keep local snapshot */}})();
 
 const BASE_CATS=[
 {id:"science",name:"العلوم",emoji:"🧪",desc:"الفيزياء والكيمياء والأحياء"},
