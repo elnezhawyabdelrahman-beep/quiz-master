@@ -338,9 +338,9 @@ img,svg,video{max-width:100%}
   <small class="assistant-note">مساعد محلي يعمل دون إنترنت؛ لا يدّعي أنه نموذج محادثة متصل.</small>
 </div>
 <button id="assistantToggle" class="assistant-toggle" aria-expanded="false">✨ <span>المساعد الذكي</span></button>
-<script src="./question-bank.js"></script>
-<script src="./question-bank-new.js"></script>
-<script src="./question-bank-islamic.js"></script>
+<script src="./question-bank.js?v=20261127-21"></script>
+<script src="./question-bank-new.js?v=20261127-21"></script>
+<script src="./question-bank-islamic.js?v=20261127-21"></script>
 <script>
 // Automatic bank synchronization: on startup, reconnect, foreground and periodically while open.
 async function refreshLiveBank(){
@@ -528,7 +528,7 @@ document.getElementById("installBtn").onclick=async()=>{soundEvent("click");if(d
 syncInstallUI();
 window.matchMedia("(display-mode: standalone)").addEventListener?.("change",syncInstallUI);
 
-if("serviceWorker"in navigator){window.addEventListener("load",async()=>{try{const registration=await navigator.serviceWorker.register("./sw.js");registration.update().catch(()=>{});window.addEventListener("online",()=>registration.update().catch(()=>{}))}catch(_){}})}
+if("serviceWorker"in navigator){window.addEventListener("load",async()=>{try{const registration=await navigator.serviceWorker.register("./sw.js?v=21");registration.update().catch(()=>{});window.addEventListener("online",()=>registration.update().catch(()=>{}))}catch(_){}})}
 
 /* Safe, offline-first assistant. It never reveals a current answer before submission. */
 function assistantSay(message,fromUser=false){
