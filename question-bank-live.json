@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "revision": 1795816295280,
+  "revision": 1795816357616,
   "categories": [],
   "deletedCategoryIds": [],
   "categoryOverrides": {},
@@ -22,6 +22,9 @@
     }
   ],
   "questionOverrides": {},
-  "deletedQuestionIds": [],
+  "deletedQuestionIds": [
+    "q153",
+    "q154"
+  ],
   "settings": {}
 }
