@@ -1,10 +1,25 @@
 {
   "schema": 1,
-  "revision": 1795816594731,
+  "revision": 1795825645865,
   "categories": [],
   "deletedCategoryIds": [],
   "categoryOverrides": {},
   "questions": [
+    {
+      "id": "custom_mwzo805g_fw931",
+      "cat": "culture",
+      "text": "أهلا شباب",
+      "opts": [
+        "١",
+        "٢",
+        "٣",
+        "٤"
+      ],
+      "correct": 1,
+      "difficulty": "easy",
+      "source": "",
+      "explain": ""
+    },
     {
       "id": "custom_mwzisinb_qr56e",
       "cat": "culture",
