@@ -1,7 +1,9 @@
-const CACHE="quiz-master-v24";
+const CACHE="quiz-master-game-v25";
+const CACHE_PREFIX="quiz-master-game-";
+const APP_BASE=new URL("./",self.location.href);
 const ASSETS=["./","./index.html","./manifest.webmanifest","./icon.svg","./question-bank.js?v=20261128-24","./question-bank-new.js?v=20261128-24","./question-bank-islamic.js?v=20261128-24","./question-bank-live.json"];
 self.addEventListener("install",e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting())));
-self.addEventListener("activate",e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
+self.addEventListener("activate",e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith(CACHE_PREFIX)&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
 self.addEventListener("fetch",e=>{
  if(e.request.method!=="GET")return;
  const url=new URL(e.request.url);

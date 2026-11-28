@@ -4,10 +4,18 @@
   "description": "تحديات معلومات وأسئلة اختيار من متعدد ومساعد محلي",
   "lang": "ar",
   "dir": "rtl",
-  "start_url": "./",
-  "scope": "./",
+  "id": "/quiz-master/",
+  "start_url": "/quiz-master/?version=game-v25",
+  "scope": "/quiz-master/",
   "display": "standalone",
   "background_color": "#0b1220",
   "theme_color": "#0b1933",
-  "icons": [{"src":"./icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+  "icons": [
+    {
+      "src": "/quiz-master/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
 }
